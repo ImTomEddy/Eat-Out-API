@@ -3,6 +3,9 @@ const Establishment = require('../models/establishment');
 const validate = require('validate.js');
 
 module.exports = async (req, res) => {
+	res.setHeader('Access-Control-Allow-Credentials', true);
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	
 	console.log(` || process.env.MONGODB_URI || ${process.env.MONGODB_URI} || `);
 
 	try {
