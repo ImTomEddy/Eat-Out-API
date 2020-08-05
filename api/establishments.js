@@ -54,7 +54,7 @@ module.exports = async (req, res) => {
 					$geometry: region
 				}
 			}
-		});
+		}).limit(500).select("location name line1 line2 town county postcode _id");
 
 		respond(res, 200, found);
 	} catch (err) {
