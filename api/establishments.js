@@ -5,8 +5,6 @@ const validate = require('validate.js');
 module.exports = async (req, res) => {
 	res.setHeader('Access-Control-Allow-Credentials', true);
 	res.setHeader('Access-Control-Allow-Origin', '*');
-	
-	console.log(` || process.env.MONGODB_URI || ${process.env.MONGODB_URI} || `);
 
 	try {
 		await mongoose.connect(process.env.MONGODB_URI, {
@@ -23,16 +21,15 @@ module.exports = async (req, res) => {
 
 	if (validation) return respond(res, 400, validation);
 
-	let {
-		north,
-		south,
-		east,
-		west
-	} = req.body;
-	north = parseFloat(north);
-	south = parseFloat(south);
-	east = parseFloat(east);
-	west = parseFloat(west);
+	const latitude = parseFloat(req.body.latitude);
+	const longitude = parseFloat(req.body.longitude);
+	const latitudeDelta = parseFloat(req.body.latitudeDelta);
+	const longitudeDelta = parseFloat(req.body.longitudeDelta);
+
+	const north = latitude + latitudeDelta;
+	const south = latitude - latitudeDelta;
+	const east = longitude + longitudeDelta;
+	const west = longitude - longitudeDelta;
 
 	const region = {
 		type: 'Polygon',
@@ -64,7 +61,7 @@ module.exports = async (req, res) => {
 }
 
 const respond = (res, status, message, error = false) => {
-	if(error) {
+	if (error) {
 		message = {
 			message: 'Error',
 			error: message
@@ -74,29 +71,38 @@ const respond = (res, status, message, error = false) => {
 			message: message
 		}
 	}
-	
+
 	res.status(status).json(message);
 	mongoose.connection.close();
 }
-const latConstraint = {
-	presence: true,
-	numericality: {
-		lessThanOrEqualTo: 90,
-		greaterThanOrEqualTo: -90
-	}
-};
-
-const longConstraint = {
-	presence: true,
-	numericality: {
-		lessThanOrEqualTo: 180,
-		greaterThanOrEqualTo: -180
-	}
-};
 
 const constraints = {
-	north: latConstraint,
-	south: latConstraint,
-	west: longConstraint,
-	east: longConstraint
+	latitude: {
+		presence: true,
+		numericality: {
+			lessThanOrEqualTo: 90,
+			greaterThanOrEqualTo: -90
+		}
+	},
+	longitude: {
+		presence: true,
+		numericality: {
+			lessThanOrEqualTo: 180,
+			greaterThanOrEqualTo: -180
+		}
+	},
+	latitudeDelta: {
+		presence: true,
+		numericality: {
+			greaterThanOrEqualTo: 0,
+			lessThanOrEqualTo: 90
+		}
+	},
+	longitudeDelta: {
+		presence: true,
+		numericality: {
+			greaterThanOrEqualTo: 0,
+			lessThanOrEqualTo: 180
+		}
+	},
 }
