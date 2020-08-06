@@ -6,9 +6,6 @@ import respond from "../../util/respond.js";
 import Establishment from "../../models/establishment.js";
 
 const EstablishmentWithinBounds = async (req, res) => {
-	res.setHeader('Access-Control-Allow-Credentials', true);
-	res.setHeader('Access-Control-Allow-Origin', '*');
-
 	if (mongoose.connection.readyState !== 1 && mongoose.connection.readyState !== 2) {
 		try {
 			await mongoose.connect(process.env.MONGODB_URI, {

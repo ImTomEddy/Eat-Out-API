@@ -3,6 +3,7 @@ import express from "express";
 import morgan from "morgan";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
+import cors from "cors";
 
 import errorMiddleware from "./middleware/error.js";
 import notFoundMiddleware from "./middleware/not-found.js";
@@ -42,6 +43,8 @@ async function setup() {
 		limit: "1mb",
 		extended: false
 	}));
+
+	app.use(cors());
 
 	app.use(morgan("dev"));
 
