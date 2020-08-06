@@ -30,6 +30,7 @@ const EstablishmentWithinBounds = async (req, res) => {
 	const longitude = parseFloat(req.body.longitude);
 	const latitudeDelta = parseFloat(req.body.latitudeDelta);
 	const longitudeDelta = parseFloat(req.body.longitudeDelta);
+	const limit = parseInt(req.body.limit);
 
 	const north = latitude + latitudeDelta;
 	const south = latitude - latitudeDelta;
@@ -64,7 +65,7 @@ const EstablishmentWithinBounds = async (req, res) => {
 				},
 				{
 					$sample: {
-						size: 750
+						size: limit
 					}
 				},
 				{
@@ -89,7 +90,7 @@ const EstablishmentWithinBounds = async (req, res) => {
 							$geometry: region
 						}
 					}
-				}).limit(500).select("location name line1 line2 town county postcode _id");
+				}).limit(limit).select("location name line1 line2 town county postcode _id");
 		}
 
 		if(found)
@@ -130,7 +131,14 @@ const constraints = {
 			greaterThanOrEqualTo: 0,
 			lessThanOrEqualTo: 180
 		}
-	}
+	},
+	limit: {
+		presence: true,
+		numericality: {
+			lessThanOrEqualTo: 2500,
+			greaterThan: -0
+		}
+	},
 }
 
 export default EstablishmentWithinBounds;
