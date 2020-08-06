@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const Establishment = mongoose.model('Establishment', {
 	name: String,
@@ -20,4 +20,4 @@ const Establishment = mongoose.model('Establishment', {
 	}
 });
 
-module.exports = Establishment;
+export default Establishment;
