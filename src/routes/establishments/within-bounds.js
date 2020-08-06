@@ -9,7 +9,7 @@ const EstablishmentWithinBounds = async (req, res) => {
 	res.setHeader('Access-Control-Allow-Credentials', true);
 	res.setHeader('Access-Control-Allow-Origin', '*');
 
-	if(mongoose.connection.readyState !== 1 || mongoose.connection.readyState !== 2) {
+	if (mongoose.connection.readyState !== 1 || mongoose.connection.readyState !== 2) {
 		try {
 			await mongoose.connect(process.env.MONGODB_URI, {
 				useNewUrlParser: true,
@@ -50,15 +50,53 @@ const EstablishmentWithinBounds = async (req, res) => {
 	};
 
 	try {
-		const found = await Establishment.find({
-			location: {
-				$geoWithin: {
-					$geometry: region
-				}
-			}
-		}).limit(500).select("location name line1 line2 town county postcode _id");
+		let found = undefined;
 
-		respond(res, 200, found);
+		if(req.body.sample) {
+			const aggregate = Establishment.aggregate([{
+					$match: {
+						location: {
+							$geoWithin: {
+								$geometry: region
+							}
+						}
+					}
+				},
+				{
+					$sample: {
+						size: 750
+					}
+				},
+				{
+					$project: {
+						location: 1,
+						name: 1,
+						line1: 1,
+						line2: 1,
+						town: 1,
+						county: 1,
+						postcode: 1,
+						_id: 1
+					}
+				}
+			]);
+
+			found = await aggregate.exec();
+		} else {
+			found = await Establishment.find({
+					location: {
+						$geoWithin: {
+							$geometry: region
+						}
+					}
+				}).limit(500).select("location name line1 line2 town county postcode _id");
+		}
+
+		if(found)
+			respond(res, 200, found);
+		else {
+			throw new Error("Something unknown went wrong");
+		}
 	} catch (err) {
 		throw err;
 	}
@@ -92,7 +130,7 @@ const constraints = {
 			greaterThanOrEqualTo: 0,
 			lessThanOrEqualTo: 180
 		}
-	},
+	}
 }
 
 export default EstablishmentWithinBounds;
