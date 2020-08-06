@@ -1,18 +1,23 @@
-const mongoose = require('mongoose');
-const Establishment = require('../models/establishment');
-const validate = require('validate.js');
+import mongoose from "mongoose";
+import validate from "validate.js";
 
-module.exports = async (req, res) => {
+import respond from "../../util/respond.js";
+
+import Establishment from "../../models/establishment.js";
+
+const EstablishmentWithinBounds = async (req, res) => {
 	res.setHeader('Access-Control-Allow-Credentials', true);
 	res.setHeader('Access-Control-Allow-Origin', '*');
 
-	try {
-		await mongoose.connect(process.env.MONGODB_URI, {
-			useNewUrlParser: true,
-			useUnifiedTopology: true
-		});
-	} catch (err) {
-		respond(res, 500, "Error connecting to DB");
+	if(mongoose.connection.readyState !== 1 || mongoose.connection.readyState !== 2) {
+		try {
+			await mongoose.connect(process.env.MONGODB_URI, {
+				useNewUrlParser: true,
+				useUnifiedTopology: true
+			});
+		} catch (err) {
+			throw err;
+		}
 	}
 
 	const validation = validate({
@@ -55,25 +60,8 @@ module.exports = async (req, res) => {
 
 		respond(res, 200, found);
 	} catch (err) {
-		console.log(err)
-		respond(res, 500, err.message);
+		throw err;
 	}
-}
-
-const respond = (res, status, message, error = false) => {
-	if (error) {
-		message = {
-			message: 'Error',
-			error: message
-		}
-	} else {
-		message = {
-			message: message
-		}
-	}
-
-	res.status(status).json(message);
-	mongoose.connection.close();
 }
 
 const constraints = {
@@ -106,3 +94,5 @@ const constraints = {
 		}
 	},
 }
+
+export default EstablishmentWithinBounds;
