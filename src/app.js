@@ -9,6 +9,7 @@ import notFoundMiddleware from "./middleware/not-found.js";
 
 import EstablishmentWithinBounds from "./routes/establishments/within-bounds.js";
 import EstablishmentCount from "./routes/establishments/count.js";
+import DatesGet from "./routes/dates/get.js";
 
 async function setup() {
 	dotenv.config();
@@ -46,6 +47,7 @@ async function setup() {
 
 	app.post('/api/establishments/within-bounds', EstablishmentWithinBounds);
 	app.get('/api/establishments/count', EstablishmentCount);
+	app.get('/api/dates', DatesGet);
 	
 	
 	// Keep Blow Routes
