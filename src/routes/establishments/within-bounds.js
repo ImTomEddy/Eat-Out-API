@@ -29,10 +29,10 @@ const EstablishmentWithinBounds = async (req, res) => {
 	const longitudeDelta = parseFloat(req.body.longitudeDelta);
 	const limit = parseInt(req.body.limit);
 
-	const north = Math.ceil((latitude + latitudeDelta) * 1000) / 1000;
-	const south = Math.floor((latitude - latitudeDelta) * 1000) / 1000;
-	const east = Math.ceil((longitude + longitudeDelta) * 1000) / 1000;
-	const west = Math.floor((longitude - longitudeDelta) * 1000) / 1000;
+	const north = Math.ceil((latitude + latitudeDelta) * 100) / 100;
+	const south = Math.floor((latitude - latitudeDelta) * 100) / 100;
+	const east = Math.ceil((longitude + longitudeDelta) * 100) / 100;
+	const west = Math.floor((longitude - longitudeDelta) * 100) / 100;
 
 	const region = {
 		type: 'Polygon',
