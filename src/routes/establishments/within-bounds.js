@@ -29,10 +29,10 @@ const EstablishmentWithinBounds = async (req, res) => {
 	const longitudeDelta = parseFloat(req.body.longitudeDelta);
 	const limit = parseInt(req.body.limit);
 
-	const north = latitude + latitudeDelta;
-	const south = latitude - latitudeDelta;
-	const east = longitude + longitudeDelta;
-	const west = longitude - longitudeDelta;
+	const north = Math.ceil((latitude + latitudeDelta) * 1000) / 1000;
+	const south = Math.floor((latitude - latitudeDelta) * 1000) / 1000;
+	const east = Math.ceil((longitude + longitudeDelta) * 1000) / 1000;
+	const west = Math.floor((longitude - longitudeDelta) * 1000) / 1000;
 
 	const region = {
 		type: 'Polygon',
@@ -50,7 +50,7 @@ const EstablishmentWithinBounds = async (req, res) => {
 	try {
 		let found = undefined;
 
-		if(req.body.sample) {
+		if (req.body.sample) {
 			const aggregate = Establishment.aggregate([{
 					$match: {
 						location: {
@@ -79,20 +79,35 @@ const EstablishmentWithinBounds = async (req, res) => {
 				}
 			]);
 
-			found = await aggregate.cache(500).exec();
+			found = await aggregate.cache(300).exec();
 		} else {
 			found = await Establishment.find({
-					location: {
-						$geoWithin: {
-							$geometry: region
-						}
+				location: {
+					$geoWithin: {
+						$geometry: region
 					}
-				}).limit(limit).cache(500).select("location name line1 line2 town county postcode _id");
+				}
+			}).limit(limit).cache(300).select("location name line1 line2 town county postcode _id");
 		}
 
-		if(found)
-			respond(res, 200, found);
-		else {
+		if (found) {
+			const lat = (north + south) / 2;
+			const lng = (east + west) / 2;
+			const latDelta = Math.round(Math.abs(Math.abs(north) - Math.abs(lat)) * 1000) / 1000
+			const lngDelta = Math.round(Math.abs(Math.abs(east) - Math.abs(lng)) * 1000) / 1000
+
+			const message = {
+				locations: found,
+				bounds: {
+					latitude: lat,
+					longitude: lng,
+					latitudeDelta: latDelta,
+					longitudeDelta: lngDelta
+				}
+			};
+
+			respond(res, 200, message);
+		} else {
 			throw new Error("Something unknown went wrong");
 		}
 	} catch (err) {
