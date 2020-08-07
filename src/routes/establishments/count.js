@@ -17,7 +17,7 @@ const EstablishmentCount = async (req, res) => {
 	}
 
 	try {
-		const found = await Establishment.find().countDocuments();
+		const found = await Establishment.find().cache(600).countDocuments();
 
 		respond(res, 200, found);
 	} catch (err) {
