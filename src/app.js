@@ -3,6 +3,7 @@ import express from "express";
 import morgan from "morgan";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
+import cachegoose from "cachegoose";
 import cors from "cors";
 
 import errorMiddleware from "./middleware/error.js";
@@ -24,6 +25,13 @@ async function setup() {
 			useUnifiedTopology: true
 		});
 		console.log('Connected to MongoDB');
+		
+		cachegoose(mongoose, {
+			engine: 'redis',
+			host: process.env.REDIS_HOST,
+			port: process.env.REDIS_PORT,
+			password: process.env.REDIS_PASS
+		});
 	} catch (err) {
 		console.log(err);
 		return await new Promise((resolve) => setTimeout(() => {

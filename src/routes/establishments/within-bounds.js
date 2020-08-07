@@ -79,7 +79,7 @@ const EstablishmentWithinBounds = async (req, res) => {
 				}
 			]);
 
-			found = await aggregate.exec();
+			found = await aggregate.cache(500).exec();
 		} else {
 			found = await Establishment.find({
 					location: {
@@ -87,7 +87,7 @@ const EstablishmentWithinBounds = async (req, res) => {
 							$geometry: region
 						}
 					}
-				}).limit(limit).select("location name line1 line2 town county postcode _id");
+				}).limit(limit).cache(500).select("location name line1 line2 town county postcode _id");
 		}
 
 		if(found)
